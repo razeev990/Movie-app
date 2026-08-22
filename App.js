@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -22,7 +22,7 @@ const IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
 const BACKDROP_BASE = 'https://image.tmdb.org/t/p/w780';
 
 const GENRES = [
-  { id: 'all', name: '🔥 All' },
+  { id: 'all', name: 'All' },
   { id: 28, name: 'Action' },
   { id: 12, name: 'Adventure' },
   { id: 16, name: 'Animation' },
@@ -59,7 +59,7 @@ export default function App() {
     }
   };
 
-  const fetchMovies = useCallback(async () => {
+  const fetchMovies = async () => {
     if (tab === 'saved') {
       setMovies(savedMovies);
       setLoading(false);
@@ -68,12 +68,12 @@ export default function App() {
 
     setLoading(true);
     try {
-      let url = `${BASE_URL}/movie/${tab}?api_key=${API_KEY}&language=en-US&page=1`;
+      let url = BASE_URL + '/movie/' + tab + '?api_key=' + API_KEY + '&language=en-US&page=1';
 
       if (searchQuery.trim().length > 0) {
-        url = `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(searchQuery)}`;
+        url = BASE_URL + '/search/movie?api_key=' + API_KEY + '&query=' + encodeURIComponent(searchQuery);
       } else if (selectedGenre !== 'all') {
-        url = `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${selectedGenre}`;
+        url = BASE_URL + '/discover/movie?api_key=' + API_KEY + '&with_genres=' + selectedGenre;
       }
 
       const res = await fetch(url);
@@ -84,11 +84,11 @@ export default function App() {
     } finally {
       setLoading(false);
     }
-  }, [tab, selectedGenre, searchQuery, savedMovies]);
+  };
 
   useEffect(() => {
     fetchMovies();
-  }, [fetchMovies]);
+  }, [tab, selectedGenre, searchQuery, savedMovies]);
 
   const openMovieDetails = async (movie) => {
     setSelectedMovie(movie);
@@ -96,21 +96,21 @@ export default function App() {
     setDetailLoading(true);
 
     try {
-      const credRes = await fetch(`${BASE_URL}/movie/${movie.id}/credits?api_key=${API_KEY}`);
+      const credRes = await fetch(BASE_URL + '/movie/' + movie.id + '/credits?api_key=' + API_KEY);
       const credJson = await credRes.json();
       setCast(credJson.cast ? credJson.cast.slice(0, 10) : []);
 
-      const vidRes = await fetch(`${BASE_URL}/movie/${movie.id}/videos?api_key=${API_KEY}`);
+      const vidRes = await fetch(BASE_URL + '/movie/' + movie.id + '/videos?api_key=' + API_KEY);
       const vidJson = await vidRes.json();
       const officialTrailer = vidJson.results ? vidJson.results.find((v) => v.type === 'Trailer' && v.site === 'YouTube') : null;
       setTrailerKey(officialTrailer ? officialTrailer.key : null);
 
-      const provRes = await fetch(`${BASE_URL}/movie/${movie.id}/watch/providers?api_key=${API_KEY}`);
+      const provRes = await fetch(BASE_URL + '/movie/' + movie.id + '/watch/providers?api_key=' + API_KEY);
       const provJson = await provRes.json();
       const regionData = provJson.results ? (provJson.results.IN || provJson.results.US) : null;
       setProviders(regionData ? (regionData.flatrate || regionData.buy || []) : []);
 
-      const simRes = await fetch(`${BASE_URL}/movie/${movie.id}/similar?api_key=${API_KEY}`);
+      const simRes = await fetch(BASE_URL + '/movie/' + movie.id + '/similar?api_key=' + API_KEY);
       const simJson = await simRes.json();
       setSimilar(simJson.results ? simJson.results.slice(0, 8) : []);
     } catch (e) {
@@ -141,7 +141,7 @@ export default function App() {
             }}
           >
             <Text style={[styles.tabText, tab === t && styles.tabTextActive]}>
-              {t === 'popular' ? 'Popular' : t === 'upcoming' ? 'Upcoming' : t === 'top_rated' ? 'Top Rated' : `Saved (${savedMovies.length})`}
+              {t === 'popular' ? 'Popular' : t === 'upcoming' ? 'Upcoming' : t === 'top_rated' ? 'Top Rated' : 'Saved (' + savedMovies.length + ')'}
             </Text>
           </TouchableOpacity>
         ))}
@@ -192,7 +192,7 @@ export default function App() {
             <TouchableOpacity style={styles.movieCard} activeOpacity={0.8} onPress={() => openMovieDetails(item)}>
               <Image
                 source={{
-                  uri: item.poster_path ? `${IMAGE_BASE}${item.poster_path}` : 'https://via.placeholder.com/300x450/1c1c1e/ffffff?text=No+Poster'
+                  uri: item.poster_path ? (IMAGE_BASE + item.poster_path) : 'https://via.placeholder.com/300x450/1c1c1e/ffffff?text=No+Poster'
                 }}
                 style={styles.poster}
               />
@@ -231,8 +231,8 @@ export default function App() {
               <Image
                 source={{
                   uri: selectedMovie && selectedMovie.backdrop_path
-                    ? `${BACKDROP_BASE}${selectedMovie.backdrop_path}`
-                    : (selectedMovie && selectedMovie.poster_path ? `${IMAGE_BASE}${selectedMovie.poster_path}` : 'https://via.placeholder.com/500x280')
+                    ? (BACKDROP_BASE + selectedMovie.backdrop_path)
+                    : (selectedMovie && selectedMovie.poster_path ? (IMAGE_BASE + selectedMovie.poster_path) : 'https://via.placeholder.com/500x280')
                 }}
                 style={styles.backdropImage}
               />
@@ -258,6 +258,199 @@ export default function App() {
               </Text>
 
               {trailerKey ? (
+                <TouchableOpacity
+                  style={styles.trailerBtn}
+                  onPress={() => Linking.openURL('https://www.youtube.com/watch?v=' + trailerKey)}
+                >
+                  <Ionicons name="logo-youtube" size={20} color="#fff" />
+                  <Text style={styles.trailerBtnText}> Watch Official Trailer</Text>
+                </TouchableOpacity>
+              ) : null}
+
+              <Text style={styles.sectionHeader}>Overview</Text>
+              <Text style={styles.overviewText}>{selectedMovie && selectedMovie.overview ? selectedMovie.overview : 'No description available.'}</Text>
+
+              {detailLoading ? (
+                <ActivityIndicator size="small" color="#E50914" style={{ marginVertical: 20 }} />
+              ) : (
+                <>
+                  {providers.length > 0 ? (
+                    <View style={{ marginTop: 20 }}>
+                      <Text style={styles.sectionHeader}>Where to Watch (OTT)</Text>
+                      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 8 }}>
+                        {providers.map((p, idx) => (
+                          <View key={idx} style={styles.providerItem}>
+                            <Image
+                              source={{ uri: 'https://image.tmdb.org/t/p/w200' + p.logo_path }}
+                              style={styles.providerLogo}
+                            />
+                            <Text style={styles.providerName} numberOfLines={1}>{p.provider_name}</Text>
+                          </View>
+                        ))}
+                      </ScrollView>
+                    </View>
+                  ) : null}
+
+                  {cast.length > 0 ? (
+                    <View style={{ marginTop: 20 }}>
+                      <Text style={styles.sectionHeader}>Top Cast</Text>
+                      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 8 }}>
+                        {cast.map((c) => (
+                          <View key={c.id} style={styles.castCard}>
+                            <Image
+                              source={{
+                                uri: c.profile_path ? ('https://image.tmdb.org/t/p/w200' + c.profile_path) : 'https://via.placeholder.com/100x150/2c2c2e/ffffff?text=Actor'
+                              }}
+                              style={styles.castImage}
+                            />
+                            <Text style={styles.castName} numberOfLines={1}>{c.name}</Text>
+                            <Text style={styles.castChar} numberOfLines={1}>{c.character}</Text>
+                          </View>
+                        ))}
+                      </ScrollView>
+                    </View>
+                  ) : null}
+
+                  {similar.length > 0 ? (
+                    <View style={{ marginTop: 20, marginBottom: 30 }}>
+                      <Text style={styles.sectionHeader}>Similar Movies</Text>
+                      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 8 }}>
+                        {similar.map((sim) => (
+                          <TouchableOpacity key={sim.id} style={styles.similarCard} onPress={() => openMovieDetails(sim)}>
+                            <Image
+                              source={{
+                                uri: sim.poster_path ? (IMAGE_BASE + sim.poster_path) : 'https://via.placeholder.com/100x150'
+                              }}
+                              style={styles.similarPoster}
+                            />
+                            <Text style={styles.similarTitle} numberOfLines={1}>{sim.title}</Text>
+                          </TouchableOpacity>
+                        ))}
+                      </ScrollView>
+                    </View>
+                  ) : null}
+                </>
+              )}
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+      </Modal>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#121212' },
+  header: { paddingHorizontal: 16, paddingVertical: 12, alignItems: 'center' },
+  headerTitle: { fontSize: 22, fontWeight: '900', color: '#E50914' },
+  tabContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 12,
+    marginBottom: 10,
+    justifyContent: 'space-between'
+  },
+  tabButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    backgroundColor: '#1E1E1E'
+  },
+  tabButtonActive: { backgroundColor: '#E50914' },
+  tabText: { color: '#888', fontSize: 13, fontWeight: '700' },
+  tabTextActive: { color: '#fff' },
+  searchBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1E1E1E',
+    marginHorizontal: 16,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    height: 42,
+    marginBottom: 8
+  },
+  searchInput: { flex: 1, color: '#fff', fontSize: 14 },
+  genreList: { paddingHorizontal: 16, gap: 8, alignItems: 'center' },
+  genrePill: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+    backgroundColor: '#222'
+  },
+  genrePillActive: { backgroundColor: '#E50914' },
+  genreText: { color: '#999', fontSize: 13, fontWeight: '600' },
+  genreTextActive: { color: '#fff' },
+  movieList: { paddingHorizontal: 16, paddingBottom: 20 },
+  movieCard: {
+    flexDirection: 'row',
+    backgroundColor: '#1c1c1e',
+    borderRadius: 12,
+    marginBottom: 12,
+    overflow: 'hidden',
+    position: 'relative'
+  },
+  poster: { width: 95, height: 140, borderRadius: 8 },
+  movieInfo: { flex: 1, padding: 12, justifyContent: 'center' },
+  movieTitle: { color: '#fff', fontSize: 16, fontWeight: '700', marginBottom: 4 },
+  releaseDate: { color: '#888', fontSize: 12, marginBottom: 4 },
+  ratingRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
+  rating: { color: '#FFD700', fontSize: 13, fontWeight: 'bold' },
+  cardActions: { flexDirection: 'row' },
+  detailBtn: {
+    backgroundColor: '#333',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 6,
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  detailBtnText: { color: '#fff', fontSize: 12, fontWeight: '600' },
+  saveIcon: { position: 'absolute', top: 12, right: 12, padding: 4 },
+  emptyView: { flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 100 },
+  emptyText: { color: '#888', fontSize: 16, marginTop: 10 },
+
+  modalContainer: { flex: 1, backgroundColor: '#121212' },
+  backdropBox: { width: '100%', height: 220, position: 'relative' },
+  backdropImage: { width: '100%', height: '100%' },
+  closeBtn: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    borderRadius: 20,
+    padding: 6
+  },
+  modalBody: { padding: 16 },
+  modalTitleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  modalTitle: { color: '#fff', fontSize: 20, fontWeight: '900', flex: 1, marginRight: 10 },
+  modalSubtitle: { color: '#999', fontSize: 13, marginTop: 4, marginBottom: 12 },
+  trailerBtn: {
+    backgroundColor: '#E50914',
+    paddingVertical: 10,
+    borderRadius: 8,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16
+  },
+  trailerBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
+  sectionHeader: { color: '#fff', fontSize: 16, fontWeight: 'bold', marginBottom: 6 },
+  overviewText: { color: '#bbb', fontSize: 13, lineHeight: 19 },
+  providerItem: { alignItems: 'center', marginRight: 14, width: 60 },
+  providerLogo: { width: 48, height: 48, borderRadius: 10, marginBottom: 4 },
+  providerName: { color: '#888', fontSize: 10, textAlign: 'center' },
+  castCard: { width: 85, marginRight: 12, alignItems: 'center' },
+  castImage: { width: 75, height: 95, borderRadius: 8, marginBottom: 4 },
+  castName: { color: '#fff', fontSize: 11, fontWeight: '600', textAlign: 'center' },
+  castChar: { color: '#777', fontSize: 10, textAlign: 'center' },
+  similarCard: { width: 90, marginRight: 12 },
+  similarPoster: { width: 90, height: 130, borderRadius: 8, marginBottom: 4 },
+  similarTitle: { color: '#aaa', fontSize: 11, textAlign: 'center' }
+});
+ailerKey ? (
                 <TouchableOpacity
                   style={styles.trailerBtn}
                   onPress={() => Linking.openURL(`https://www.youtube.com/watch?v=${trailerKey}`)}
