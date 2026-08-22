@@ -10,6 +10,7 @@
     },
     "android": {
       "package": "com.razeev.movieapp",
+      "permissions": ["INTERNET"],
       "splash": {
         "backgroundColor": "#121212"
       }
