@@ -1,7 +1,8 @@
 {
   "expo": {
     "name": "Movie App",
-    "slug": "movie-app-",
+    "slug": "razeev",
+    "owner": "razeev99091s-team",
     "version": "1.0.0",
     "orientation": "portrait",
     "splash": {
@@ -17,7 +18,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "04b367ae-3fe0-4be6-945a-0f6bb0a8106e"
+        "projectId": "a627c9a5-aafd-439a-be81-28a76d5b43c2"
       }
     }
   }
