@@ -4,8 +4,15 @@
     "slug": "movie-app-",
     "version": "1.0.0",
     "orientation": "portrait",
+    "splash": {
+      "backgroundColor": "#121212",
+      "resizeMode": "contain"
+    },
     "android": {
-      "package": "com.razeev.movieapp"
+      "package": "com.razeev.movieapp",
+      "splash": {
+        "backgroundColor": "#121212"
+      }
     },
     "extra": {
       "eas": {
