@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Movie App",
+    "name": "Movie Collection",
     "slug": "razeev",
     "owner": "razeev99091s-team",
     "version": "1.0.0",
@@ -10,7 +10,7 @@
       "resizeMode": "contain"
     },
     "android": {
-      "package": "com.razeev.movieapp",
+      "package": "com.razeev.moviecollection",
       "permissions": ["INTERNET"],
       "splash": {
         "backgroundColor": "#121212"
