@@ -6,9 +6,11 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "android": {
-      "package": "com.razeev.movieapp",
-      "adaptiveIcon": {
-        "backgroundColor": "#ffffff"
+      "package": "com.razeev.movieapp"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "04b367ae-3fe0-4be6-945a-0f6bb0a8106e"
       }
     }
   }
