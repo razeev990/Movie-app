@@ -15,7 +15,7 @@ import {
   StatusBar
 } from 'react-native';
 
-const API_KEY = '84142cf6f76c66ae978bb151e2bd8924';
+const API_KEY = 'c45a857c193f6302f2b5061c3b85e743';
 const BASE_URL = 'https://api.themoviedb.org/3';
 const IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
 
